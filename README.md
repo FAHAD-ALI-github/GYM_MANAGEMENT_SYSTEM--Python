@@ -54,6 +54,15 @@ gms-python/
 ```
 
 ---
+## 📸 Screenshots
+
+### 🧑‍💼 Admin Panel  
+![Admin Panel](screenshots/admin.png)
+
+### 👤 User Panel  
+![User Panel](screenshots/user.png)
+
+---
 
 ## 👨‍💻 Author
 
