@@ -1,4 +1,5 @@
 from datetime import *
+from tabulate import tabulate
 
 data_file = "Gym_database.txt"
 gym_splits_1 = """1 - Three day split
@@ -61,24 +62,28 @@ def new_registration():
     file.write(data_line)
     file.close()
 
-
 def read_all():
-    file = open(data_file, "r")
-    n = 1  # var 'n' is made to count no. of lines
-    no_of_lines = 0
-    file_list = []
-    for line in file:
-        a = line.split("\t")
-        file_list.append(a)
-        no_of_lines = n
-        n += 1
-    file.close()
-    for i in range(no_of_lines):
-        print(file_list[i][0] + "\t\t\t" + file_list[i][1] + "\t\t\t" + file_list[i][2] + "\t\t\t" +
-              file_list[i][3] + "\t\t\t" + file_list[i][4] + "\t\t\t" + file_list[i][5] + "\t\t\t" +
-              file_list[i][6] + "\t\t\t" + file_list[i][7] + "\t\t\t" + file_list[i][8] + "\t\t\t" +
-              file_list[i][9] + "\t\t\t" + str(file_list[i][10]) + "\t\t\t" + file_list[i][11] + "\t\t\t" +
-              file_list[i][12])
+    with open(data_file, "r") as file:
+        file_list = []
+        for line in file:
+            fields = line.strip().split("\t")
+            dob = fields[4]
+            age_ = calculate_age(dob)
+            file_list.append([
+                fields[0],                  # ID
+                fields[1],                  # Name
+                age_,                       # Age
+                fields[5] + " kg",          # Weight
+                fields[6] + " cm",          # Height
+                fields[7],                  # BMI
+                fields[9][:19],             # Join Date
+                fields[10],                 # Days
+                "Split " + fields[11],      # Split
+                fields[12].strip()          # Fee status
+            ])
+
+    headers = ["ID", "Name", "Age", "Weight", "Height", "BMI", "Join Date", "Days", "Split", "Fee Status"]
+    print(tabulate(file_list, headers=headers, tablefmt="fancy_grid"))
 
 
 def today_game(x, y):
@@ -267,3 +272,10 @@ def age(dob):
     age_year = current_year - year
     age_ = ("YOUR AGE IS : " + str(age_year) + " years, " + str(age_month) + " months, " + str(age_day) + " days")
     return age_
+
+
+def calculate_age(dob):
+    day, month, year = map(int, dob.split("-"))
+    today = datetime.today()
+    age = today.year - year - ((today.month, today.day) < (month, day))
+    return f"{age} yrs"

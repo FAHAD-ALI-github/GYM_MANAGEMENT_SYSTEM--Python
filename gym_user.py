@@ -1,59 +1,65 @@
+# gym_user.py
 from main_python import *
+from colorama import Fore, Style, init
+from tabulate import tabulate
+init(autoreset=True)
 
-id_ = ""
-username_ = ""
-password_ = ""
-dob_ = ""
-weight = ""
-height = ""
-bmi = ""
-split_number = ""
-joining_day = ""
+def display_bmi(weight, height, bmi):
+    x = int(weight) / ((int(height) / 100) ** 2)
+    print(Fore.YELLOW + f"Your BMI is: {x:.2f}  ({bmi})")
 
+def user_menu():
+    print(Fore.CYAN + """
+===================================================
+                🏋️ GYM USER MENU 🏋️
+===================================================
+1. Change your password
+2. See your age
+3. See your BMI
+0. Exit
+""")
 
-x = input("Enter your username OR press 1 for new registration : ").upper()
-if x == '1':
-    new_registration()
-else:
-    file = open(data_file, "r")
-    for line in file:
-        full_line = line.split("\t")
-        id_ = full_line[0]
-        username_ = full_line[2]
-        password_ = full_line[3]
-        dob_ = full_line[4]
-        weight = full_line[5]
-        height = full_line[6]
-        bmi = full_line[7]
-        split_number = full_line[11]
-        joining_day = full_line[8]
+def login():
+    print(Fore.GREEN + "Welcome to the Gym CLI")
+    username_input = input("Enter your username or '1' for new registration: ").strip().upper()
+    if username_input == '1':
+        new_registration()
+        return
 
-        if x == username_:
-            password = input("ENTER PASSWORD  :  ").strip().upper()
-            if password == password_:
-                day = datetime.now().strftime("%A")
-                print(f"TODAY IS {day} :")
-                today_game(split_number, joining_day)
-                a = input("""\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    Enter 1 to change your password
-    Enter 2 to see your age
-    Enter 3 to see your Body Mass Index ( BMI )
-    Or Enter 0 to end the PRoGRAM\n\t>>> """)
-                if a == '1':
-                    password = input("ENTER previous PASSWORD  :  ").strip().upper()
-                    if password == password_:
-                        password_ = input("ENTER new PASSWORD  :  ").strip().upper()
-                        password__ = input("REWRITE PASSWORD  :  ").strip().upper()
-                        if password__ == password_:
-                            change_password(id_, password__)
+    with open(data_file, "r") as file:
+        for line in file:
+            fields = line.strip().split("\t")
+            if username_input == fields[2]:
+                password_input = input("Enter password: ").strip().upper()
+                if password_input == fields[3]:
+                    id_, _, username_, password_, dob_, weight, height, bmi, joining_day, *_ = fields
+                    print(Fore.CYAN + f"\nToday is {datetime.now().strftime('%A')}:\n")
+                    today_game(fields[11], joining_day)
 
-                if a == '2':
-                    print(age(dob_))
+                    while True:
+                        user_menu()
+                        choice = input(Fore.GREEN + "Choose an option: ").strip()
+                        if choice == '1':
+                            old_pw = input("Enter current password: ").strip().upper()
+                            if old_pw == password_:
+                                new_pw = input("Enter new password: ").strip().upper()
+                                confirm_pw = input("Confirm new password: ").strip().upper()
+                                if new_pw == confirm_pw:
+                                    change_password(id_, new_pw)
+                                    print(Fore.GREEN + "Password updated successfully.")
+                                else:
+                                    print(Fore.RED + "Passwords do not match.")
+                        elif choice == '2':
+                            print(age(dob_))
+                        elif choice == '3':
+                            display_bmi(weight, height, bmi)
+                        elif choice == '0':
+                            print(Fore.BLUE + "Goodbye!")
+                            exit()
+                        else:
+                            print(Fore.RED + "Invalid option.")
+                    return
+    print(Fore.RED + "User not found or incorrect password.")
 
-                if a == '3':
-                    x = int(weight) / ((int(height) / 100) ** 2)
-                    print(f"YOUR BODY MASS INDEX IS {x:.5}  (<<{bmi}>>)")
-
-                if a == '0':
-                    exit()
-    file.close()
+if __name__ == "__main__":
+    login()
